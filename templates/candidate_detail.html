@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block title %}{{ candidate.name }} - Candidate Details - ATS Recruiter Pro{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <!-- Breadcrumb & Navigation -->
+    <div class="breadcrumb-bar">
+        <a href="{{ url_for('candidates_page') }}" class="breadcrumb-link">&larr; Back to Candidates Pipeline</a>
+    </div>
+
+    <!-- Candidate Profile Header Card -->
+    <section class="card candidate-profile-card">
+        <div class="profile-header-main">
+            <div class="profile-avatar" style="background: {{ candidate.role_style.bg }}; color: {{ candidate.role_style.color }}; border: 1px solid {{ candidate.role_style.border }};">
+                {{ candidate.name[:2]|upper }}
+            </div>
+            <div class="profile-details">
+                <div class="profile-name-row">
+                    <h1 class="profile-name">{{ candidate.name }}</h1>
+                    <span class="status-badge status-{{ candidate.status.lower() }}">{{ candidate.status }}</span>
+                </div>
+                <div class="mt-1" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <span class="profile-role">Target Job Role:</span>
+                    <span class="role-badge {{ candidate.role_style.class_name }}">
+                        <span class="role-dot"></span>
+                        {{ candidate.job_title }}
+                    </span>
+                    <span class="badge badge-light">{{ candidate.role_style.category }}</span>
+                </div>
+                <div class="profile-contact-row">
+                    {% if candidate.email %}
+                        <span class="contact-item">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            </svg>
+                            {{ candidate.email }}
+                        </span>
+                    {% endif %}
+                    {% if candidate.phone %}
+                        <span class="contact-item">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                            </svg>
+                            {{ candidate.phone }}
+                        </span>
+                    {% endif %}
+                    <span class="contact-item">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        Applied on {{ candidate.created_at[:10] }}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="profile-score-box">
+                <div class="score-number {% if candidate.match_percentage >= 60 %}text-green{% elif candidate.match_percentage >= 35 %}text-amber{% else %}text-red{% endif %}">
+                    {{ candidate.match_percentage }}%
+                </div>
+                <span class="score-tagline">Cosine Match Score</span>
+            </div>
+        </div>
+
+        <!-- Recruiter Stage Actions -->
+        <div class="profile-stage-actions">
+            <span class="stage-actions-label">Change Application Status:</span>
+            <form action="{{ url_for('update_status', candidate_id=candidate.id) }}" method="POST" class="stage-button-group">
+                <button type="submit" name="status" value="Reviewing" class="btn btn-sm {% if candidate.status == 'Reviewing' %}btn-amber-active{% else %}btn-outline{% endif %}">
+                    Reviewing
+                </button>
+                <button type="submit" name="status" value="Shortlisted" class="btn btn-sm {% if candidate.status == 'Shortlisted' %}btn-green-active{% else %}btn-outline{% endif %}">
+                    Shortlisted
+                </button>
+                <button type="submit" name="status" value="Rejected" class="btn btn-sm {% if candidate.status == 'Rejected' %}btn-red-active{% else %}btn-outline{% endif %}">
+                    Rejected
+                </button>
+            </form>
+
+            <a href="{{ url_for('download_file', filename=candidate.filename) }}" class="btn btn-sm btn-secondary" target="_blank">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+                Download Original Resume ({{ candidate.filename }})
+            </a>
+        </div>
+    </section>
+
+    <!-- Skills Match Overview Grid -->
+    <div class="skills-comparison-grid mt-4">
+        <!-- Matched Skills -->
+        <div class="skills-box skills-matched">
+            <div class="skills-box-header">
+                <div class="skills-box-title">
+                    <span class="skills-indicator indicator-green"></span>
+                    Matched Skills ({{ candidate.matched_skills|length }})
+                </div>
+                <span class="skills-subtitle">Candidate resume matches these job requirements</span>
+            </div>
+            <div class="skills-tags">
+                {% if candidate.matched_skills %}
+                    {% for skill in candidate.matched_skills %}
+                        <span class="tag tag-matched">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            {{ skill }}
+                        </span>
+                    {% endfor %}
+                {% else %}
+                    <p class="no-skills-text">No direct skill matches found.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Missing Skills Summary -->
+        <div class="skills-box skills-missing">
+            <div class="skills-box-header">
+                <div class="skills-box-title">
+                    <span class="skills-indicator indicator-red"></span>
+                    Missing Skills &amp; Gaps ({{ candidate.missing_skills|length }})
+                </div>
+                <span class="skills-subtitle">Skills requested in job description not found in resume</span>
+            </div>
+            <div class="skills-tags">
+                {% if candidate.missing_skills %}
+                    {% for skill in candidate.missing_skills %}
+                        <span class="tag tag-missing">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                            {{ skill }}
+                        </span>
+                    {% endfor %}
+                {% else %}
+                    <p class="no-skills-text text-green">All key skills requested by the job description are present.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Deep Missing Skills & Learning Roadmaps Feature (Requested) -->
+    {% if candidate.missing_skills_detailed %}
+    <section class="card mt-4">
+        <div class="card-header">
+            <div>
+                <h2 class="card-title">Missing Skills Analysis &amp; Upskilling Roadmaps</h2>
+                <p class="card-subtitle">Prioritized skill gaps, learning roadmaps, and screening interview questions for recruiters</p>
+            </div>
+            <span class="badge badge-light">{{ candidate.missing_skills_detailed|length }} Gaps Identified</span>
+        </div>
+
+        <div class="missing-skills-grid">
+            {% for ms in candidate.missing_skills_detailed %}
+                <div class="missing-skill-card {% if ms.priority in ['Critical', 'Core'] %}critical{% endif %}">
+                    <div class="missing-skill-header">
+                        <span class="missing-skill-name">
+                            {% if ms.priority in ['Critical', 'Core'] %}
+                                <svg width="18" height="18" fill="none" stroke="#dc2626" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                </svg>
+                            {% else %}
+                                <svg width="18" height="18" fill="none" stroke="#d97706" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            {% endif %}
+                            {{ ms.name }}
+                        </span>
+                        <span class="badge-priority {{ ms.priority_class }}">{{ ms.priority }}</span>
+                    </div>
+
+                    <div class="est-time-tag">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Est. Upskilling Time: <strong>{{ ms.est_time }}</strong>
+                    </div>
+
+                    <div class="learning-topics-box">
+                        <div class="learning-box-title">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                            </svg>
+                            Key Study Topics:
+                        </div>
+                        <p>{{ ms.topics }}</p>
+                    </div>
+
+                    <div class="interview-question-box">
+                        <div class="interview-box-title">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Screening Question for Recruiter:
+                        </div>
+                        <p class="interview-box-quote">"{{ ms.interview_question }}"</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Constructive Candidate Feedback Email Generator -->
+    <div class="feedback-card">
+        <div class="feedback-header">
+            <div class="feedback-title">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                Constructive Candidate Feedback Generator
+            </div>
+            <div>
+                <button type="button" class="btn btn-primary" onclick="copyFeedbackText('feedbackDetailText', this)">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                    </svg>
+                    Copy Feedback Email
+                </button>
+                <span id="copyToast" class="copy-toast">Copied to Clipboard!</span>
+            </div>
+        </div>
+        <div class="feedback-content" id="feedbackDetailText">{{ candidate.feedback_text }}</div>
+    </div>
+    {% endif %}
+
+    <!-- Side-by-side Extracted Text & Target Job Description -->
+    <div class="dashboard-columns mt-4">
+        <!-- Extracted Resume Text -->
+        <section class="card content-column-main">
+            <div class="card-header">
+                <h2 class="card-title">Extracted Resume Text</h2>
+                <p class="card-subtitle">Parsed automatically using PyPDF2 / python-docx</p>
+            </div>
+            <div class="extracted-content-box">
+                <pre>{{ candidate.extracted_text }}</pre>
+            </div>
+        </section>
+
+        <!-- Target Job Description -->
+        <section class="card content-column-side">
+            <div class="card-header">
+                <h2 class="card-title">Target Job Description</h2>
+                <p class="card-subtitle">{{ candidate.job_title }}</p>
+            </div>
+            <div class="job-desc-preview">
+                {{ candidate.job_description }}
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

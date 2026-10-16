@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NexusAI - Modern Intelligent Assistant</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Icons (Lucide & FontAwesome CDN) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Highlight.js for Code Highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+  <!-- Marked.js for Markdown Rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.1/marked.min.js"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="app-body">
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Global Overlay / Backdrop -->
+  <div id="modal-backdrop" class="modal-backdrop hidden"></div>
+
+  <!-- ================================================================= -->
+  <!-- AUTHENTICATION CONTAINER (SIGN UP / LOGIN / FORGOT PASSWORD)     -->
+  <!-- ================================================================= -->
+  <div id="auth-container" class="auth-wrapper hidden">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="brand-badge">
+          <i class="fa-solid fa-sparkles brand-icon"></i>
+          <span>NexusAI</span>
+        </div>
+        <h2 id="auth-title">Welcome to NexusAI</h2>
+        <p id="auth-subtitle">Sign in to access your intelligent workspace</p>
+      </div>
+
+      <!-- Alert Message Box -->
+      <div id="auth-alert" class="alert-box hidden"></div>
+
+      <!-- LOGIN FORM -->
+      <form id="login-form" class="auth-form" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="login-email">Email Address</label>
+          <div class="input-with-icon">
+            <i class="fa-regular fa-envelope input-icon"></i>
+            <input type="email" id="login-email" placeholder="you@example.com" required autocomplete="email">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="label-row">
+            <label for="login-password">Password</label>
+            <a href="javascript:void(0)" class="forgot-link" onclick="showForgotPasswordModal()">Forgot password?</a>
+          </div>
+          <div class="input-with-icon">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input type="password" id="login-password" placeholder="Enter your password" required autocomplete="current-password">
+            <button type="button" class="btn-toggle-pw" onclick="togglePasswordVisibility('login-password', this)">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-options">
+          <label class="checkbox-label">
+            <input type="checkbox" id="login-remember">
+            <span>Remember me for 14 days</span>
+          </label>
+        </div>
+
+        <button type="submit" id="login-btn" class="btn btn-primary btn-block">
+          <span class="btn-text">Sign In</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+
+        <div class="auth-footer">
+          <span>Don't have an account?</span>
+          <a href="javascript:void(0)" onclick="switchAuthMode('signup')">Create an account</a>
+        </div>
+      </form>
+
+      <!-- SIGN UP FORM -->
+      <form id="signup-form" class="auth-form hidden" onsubmit="handleSignup(event)">
+        <div class="form-group">
+          <label for="signup-name">Full Name</label>
+          <div class="input-with-icon">
+            <i class="fa-regular fa-user input-icon"></i>
+            <input type="text" id="signup-name" placeholder="Alex Johnson" required autocomplete="name">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="signup-email">Email Address</label>
+          <div class="input-with-icon">
+            <i class="fa-regular fa-envelope input-icon"></i>
+            <input type="email" id="signup-email" placeholder="alex@example.com" required autocomplete="email">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="signup-password">Password</label>
+          <div class="input-with-icon">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input type="password" id="signup-password" placeholder="Enter password (e.g. M12345)" required oninput="evaluatePasswordStrength(this.value, 'signup-strength-meter', 'signup-strength-text')">
+            <button type="button" class="btn-toggle-pw" onclick="togglePasswordVisibility('signup-password', this)">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+          <!-- Real-time Password Strength Meter -->
+          <div class="strength-meter-container">
+            <div id="signup-strength-meter" class="strength-meter-bar"></div>
+          </div>
+          <div class="strength-info">
+            <span id="signup-strength-text" class="strength-label">Strength: Weak</span>
+            <span class="strength-hint">Use letters, numbers, and symbols for better security</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="signup-confirm-password">Confirm Password</label>
+          <div class="input-with-icon">
+            <i class="fa-solid fa-shield-check input-icon"></i>
+            <input type="password" id="signup-confirm-password" placeholder="Repeat your password" required>
+            <button type="button" class="btn-toggle-pw" onclick="togglePasswordVisibility('signup-confirm-password', this)">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" id="signup-btn" class="btn btn-primary btn-block">
+          <span class="btn-text">Create Account</span>
+          <i class="fa-solid fa-user-plus"></i>
+        </button>
+
+        <div class="auth-footer">
+          <span>Already registered?</span>
+          <a href="javascript:void(0)" onclick="switchAuthMode('login')">Sign In</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- FORGOT PASSWORD MODAL -->
+  <div id="forgot-pw-modal" class="modal-dialog hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-key text-primary"></i> Reset Password</h3>
+        <button class="modal-close" onclick="closeModal('forgot-pw-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="info-banner" style="background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; font-size: 0.85rem; color: #cbd5e1; display: flex; align-items: flex-start; gap: 8px;">
+          <i class="fa-solid fa-circle-info" style="color: #818cf8; margin-top: 2px;"></i>
+          <span><strong>Notice:</strong> Automated reset email delivery requires external SMTP configuration. In this environment, enter your registered email and new password to update directly in SQLite.</span>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="forgot-email" class="input-field" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label>New Password (min. 4 characters)</label>
+          <input type="password" id="forgot-new-pw" class="input-field" placeholder="Enter new password (min. 4 characters)" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('forgot-pw-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="handleForgotPasswordSubmit()">Save New Password</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ================================================================= -->
+  <!-- MAIN APPLICATION DASHBOARD (POST LOGIN)                           -->
+  <!-- ================================================================= -->
+  <div id="app-container" class="app-layout hidden">
+
+    <!-- LEFT SIDEBAR -->
+    <aside id="app-sidebar" class="app-sidebar">
+      <!-- Sidebar Header -->
+      <div class="sidebar-header">
+        <div class="brand">
+          <div class="brand-avatar">
+            <i class="fa-solid fa-sparkles"></i>
+          </div>
+          <div class="brand-info">
+            <span class="brand-name">NexusAI</span>
+            <span class="brand-tag">Studio v2.5</span>
+          </div>
+        </div>
+        <button class="btn-icon sidebar-collapse-btn" onclick="toggleSidebar()" title="Toggle Sidebar">
+          <i class="fa-solid fa-bars-staggered"></i>
+        </button>
+      </div>
+
+      <!-- Action Buttons: New Chat & Search -->
+      <div class="sidebar-actions">
+        <button class="btn btn-new-chat" onclick="createNewChat()">
+          <i class="fa-solid fa-plus"></i>
+          <span>New Chat</span>
+          <kbd class="shortcut-key">Ctrl+N</kbd>
+        </button>
+
+        <button class="btn btn-search-trigger" onclick="openSearchModal()">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <span>Search...</span>
+          <kbd class="shortcut-key">Ctrl+K</kbd>
+        </button>
+      </div>
+
+      <!-- Navigation Links: Library & Projects -->
+      <nav class="sidebar-nav">
+        <button class="nav-item" id="nav-chats" onclick="switchView('chat')">
+          <i class="fa-solid fa-message-dots"></i>
+          <span>Conversations</span>
+        </button>
+        <button class="nav-item" id="nav-library" onclick="switchView('library')">
+          <i class="fa-solid fa-folder-open"></i>
+          <span>Library</span>
+          <span id="library-count-badge" class="nav-badge">0</span>
+        </button>
+        <button class="nav-item" id="nav-projects" onclick="switchView('projects')">
+          <i class="fa-solid fa-diagram-project"></i>
+          <span>Projects</span>
+          <span id="project-count-badge" class="nav-badge">0</span>
+        </button>
+        <button class="nav-item" id="nav-settings" onclick="switchView('settings')">
+          <i class="fa-solid fa-sliders"></i>
+          <span>Settings</span>
+        </button>
+      </nav>
+
+      <!-- Scrollable Conversation Lists -->
+      <div class="sidebar-scroll-area">
+        <!-- Pinned Chats Section -->
+        <div id="pinned-section" class="chat-section">
+          <div class="section-title">
+            <span><i class="fa-solid fa-thumbtack text-warning"></i> Pinned Chats</span>
+          </div>
+          <div id="pinned-chats-list" class="chats-list">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Recent Chat History Section -->
+        <div class="chat-section">
+          <div class="section-title">
+            <span><i class="fa-solid fa-clock-rotate-left"></i> Chat History</span>
+          </div>
+          <div id="history-chats-list" class="chats-list">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+
+      <!-- User Profile & Footer Section -->
+      <div class="sidebar-footer">
+        <div class="user-card" onclick="switchView('settings')">
+          <div id="user-avatar-display" class="user-avatar">AJ</div>
+          <div class="user-meta">
+            <span id="user-name-display" class="user-name">Alex Johnson</span>
+            <span id="user-email-display" class="user-email">alex@example.com</span>
+          </div>
+        </div>
+        <button class="btn-icon btn-logout" onclick="handleLogout()" title="Sign Out">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+        </button>
+      </div>
+    </aside>
+
+
+    <!-- MAIN CONTENT VIEWPORT -->
+    <main class="main-viewport">
+
+      <!-- MOBILE TOP NAV -->
+      <header class="mobile-header">
+        <button class="btn-icon" onclick="toggleSidebar()">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <span class="mobile-brand"><i class="fa-solid fa-sparkles text-primary"></i> NexusAI</span>
+        <button class="btn-icon" onclick="createNewChat()">
+          <i class="fa-solid fa-plus"></i>
+        </button>
+      </header>
+
+      <!-- ============================================================= -->
+      <!-- VIEW 1: CHAT INTERFACE & DASHBOARD HERO                        -->
+      <!-- ============================================================= -->
+      <section id="view-chat" class="app-view active-view">
+        
+        <!-- Active Chat Top Header Bar -->
+        <header id="chat-header" class="chat-header">
+          <div class="chat-header-info">
+            <h3 id="current-chat-title" class="chat-title" onclick="promptRenameChat()">New Conversation</h3>
+            <span id="current-chat-project-badge" class="project-tag hidden">Project</span>
+          </div>
+          <div class="chat-header-actions">
+            <!-- PROMINENT PIN BUTTON WITH VISIBLE BADGE -->
+            <button id="btn-pin-active-chat" class="btn-pin-pill" onclick="togglePinCurrentChat()" title="Pin this chat to top of sidebar">
+              <i class="fa-regular fa-thumbtack"></i>
+              <span id="pin-btn-text">Pin Chat</span>
+            </button>
+            <button class="btn-icon" onclick="exportCurrentChat()" title="Export Conversation (Markdown)">
+              <i class="fa-solid fa-arrow-down-to-bracket"></i>
+            </button>
+            <button class="btn-icon text-warning" onclick="clearCurrentChatMessages()" title="Clear Chat Messages">
+              <i class="fa-solid fa-broom"></i>
+            </button>
+            <button class="btn-icon" onclick="promptRenameChat()" title="Rename Conversation">
+              <i class="fa-solid fa-pen"></i>
+            </button>
+            <button class="btn-icon text-danger" onclick="deleteCurrentChat()" title="Delete Conversation">
+              <i class="fa-regular fa-trash-can"></i>
+            </button>
+          </div>
+        </header>
+
+        <!-- Messages Container -->
+        <div id="chat-messages-container" class="chat-messages-container">
+          
+          <!-- DASHBOARD HERO / EMPTY STATE -->
+          <div id="hero-welcome-screen" class="hero-screen">
+            <div class="hero-badge">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+              <span>Nexus Intelligence</span>
+            </div>
+            <h1 class="hero-title">How can I help you today?</h1>
+            <p class="hero-description">Ask any question, brainstorm architectures, write code, or attach files to analyze.</p>
+
+            <!-- Suggestion Prompt Cards -->
+            <div class="suggestions-grid">
+              <div class="prompt-card" onclick="usePromptSuggestion('Explain Python and its key advantages with modern code examples.')">
+                <div class="card-icon bg-indigo"><i class="fa-brands fa-python"></i></div>
+                <div class="card-content">
+                  <h4>Learn Python</h4>
+                  <p>Explore syntax, data structures, and best practices.</p>
+                </div>
+              </div>
+
+              <div class="prompt-card" onclick="usePromptSuggestion('Help me write an ATS-friendly Fresher Resume for a Software Developer role.')">
+                <div class="card-icon bg-cyan"><i class="fa-solid fa-file-invoice"></i></div>
+                <div class="card-content">
+                  <h4>ATS Resume Builder</h4>
+                  <p>Build job-winning resumes, summaries, and skills.</p>
+                </div>
+              </div>
+
+              <div class="prompt-card" onclick="usePromptSuggestion('Write a clean, production-ready Python calculator script with error handling.')">
+                <div class="card-icon bg-emerald"><i class="fa-solid fa-code"></i></div>
+                <div class="card-content">
+                  <h4>Write Code & Debug</h4>
+                  <p>Generate clean algorithms, APIs, or debugging solutions.</p>
+                </div>
+              </div>
+
+              <div class="prompt-card" onclick="usePromptSuggestion('வணக்கம்! எனக்கு Python மற்றும் Web Development கற்றுக்கொள்ள உதவி பண்ணுங்க.')">
+                <div class="card-icon bg-purple"><i class="fa-solid fa-language"></i></div>
+                <div class="card-content">
+                  <h4>தமிழ் / Tanglish உதவி</h4>
+                  <p>Learn coding, resume tips & tech in simple Tamil/Tanglish.</p>
+                </div>
+              </div>
+
+              <div class="prompt-card" onclick="usePromptSuggestion('Calculate step-by-step: 15 * 24 + 350 and explain the math.')">
+                <div class="card-icon bg-amber"><i class="fa-solid fa-calculator"></i></div>
+                <div class="card-content">
+                  <h4>Math & Logic</h4>
+                  <p>Solve equations, percentages, and numerical problems.</p>
+                </div>
+              </div>
+
+              <div class="prompt-card" onclick="triggerFileUploadForPrompt()">
+                <div class="card-icon bg-rose"><i class="fa-solid fa-file-lines"></i></div>
+                <div class="card-content">
+                  <h4>Analyze a File</h4>
+                  <p>Upload PDF, DOCX, CSV, Excel, or PPTX to summarize.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- DYNAMIC MESSAGE STREAM -->
+          <div id="messages-list" class="messages-list">
+            <!-- Messages rendered dynamically -->
+          </div>
+
+          <!-- Typing Indicator -->
+          <div id="typing-indicator" class="typing-indicator hidden">
+            <div class="typing-avatar"><i class="fa-solid fa-sparkles"></i></div>
+            <div class="typing-dots">
+              <span></span><span></span><span></span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- CHAT INPUT DOCK -->
+        <div class="chat-input-dock">
+          <!-- Active File Attachment Chips -->
+          <div id="attachment-chips-container" class="attachment-chips-container hidden"></div>
+
+          <!-- CHATGPT PERSONA & QUICK MODE SELECTOR -->
+          <div class="persona-chips-bar">
+            <button type="button" class="persona-chip active" data-persona="all" onclick="selectPersona('all', this)">
+              <i class="fa-solid fa-sparkles text-primary"></i> All-Round AI
+            </button>
+            <button type="button" class="persona-chip" data-persona="coder" onclick="selectPersona('coder', this)">
+              <i class="fa-solid fa-code text-success"></i> Code Expert
+            </button>
+            <button type="button" class="persona-chip" data-persona="resume" onclick="selectPersona('resume', this)">
+              <i class="fa-solid fa-file-invoice text-info"></i> Resume & ATS
+            </button>
+            <button type="button" class="persona-chip" data-persona="tamil" onclick="selectPersona('tamil', this)">
+              <i class="fa-solid fa-language text-warning"></i> தமிழ் / Tanglish
+            </button>
+            <button type="button" class="persona-chip" data-persona="math" onclick="selectPersona('math', this)">
+              <i class="fa-solid fa-calculator text-danger"></i> Math & Logic
+            </button>
+            <button type="button" class="persona-chip" data-persona="writer" onclick="selectPersona('writer', this)">
+              <i class="fa-solid fa-pen-nib text-purple"></i> Writing & Email
+            </button>
+          </div>
+
+          <div class="input-bar-container">
+            <!-- Attachment & Image Upload Buttons -->
+            <div class="input-actions-left">
+              <button type="button" class="btn-icon" onclick="triggerFilePicker('any')" title="Attach Document (PDF, DOCX, CSV, XLSX, PPTX, TXT)">
+                <i class="fa-solid fa-paperclip"></i>
+              </button>
+              <button type="button" class="btn-icon" onclick="triggerFilePicker('image')" title="Attach Image (PNG, JPG, WEBP)">
+                <i class="fa-regular fa-image"></i>
+              </button>
+              <input type="file" id="chat-file-input" class="hidden" onchange="handleFileSelected(event)">
+            </div>
+
+            <!-- Auto-expanding Textarea -->
+            <textarea id="chat-input" class="chat-textarea" placeholder="Send a message... (Press Enter to send, Shift + Enter for new line)" rows="1" oninput="handleInputStats(this)" onkeydown="handleInputKeydown(event)"></textarea>
+
+            <!-- Microphone, Send, & Stop Controls -->
+            <div class="input-actions-right">
+              <button type="button" id="btn-mic" class="btn-icon mic-btn" onclick="toggleSpeechRecognition()" title="Voice input (Speech to Text)">
+                <i class="fa-solid fa-microphone"></i>
+              </button>
+
+              <button type="button" id="btn-stop-generate" class="btn-icon btn-stop hidden" onclick="stopGenerating()" title="Stop Generation">
+                <i class="fa-solid fa-stop"></i>
+              </button>
+
+              <button type="button" id="btn-send" class="btn-send" onclick="sendActiveMessage()" title="Send Message (Enter)">
+                <i class="fa-solid fa-arrow-up"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Footer Row with Counter & Disclaimer -->
+          <div class="input-footer-row">
+            <span class="disclaimer-text">NexusAI can brainstorm, write code, and analyze documents. Verify critical facts.</span>
+            <div class="input-stats-counter">
+              <span id="input-word-count">0 words</span> · <span id="input-char-count">0 chars</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ============================================================= -->
+      <!-- VIEW 2: LIBRARY SECTION                                        -->
+      <!-- ============================================================= -->
+      <section id="view-library" class="app-view hidden">
+        <div class="view-header">
+          <div>
+            <h2><i class="fa-solid fa-folder-open text-primary"></i> File Library</h2>
+            <p class="text-muted">Manage all documents and spreadsheets uploaded across your chats</p>
+          </div>
+          <button class="btn btn-primary" onclick="triggerFilePicker('any')">
+            <i class="fa-solid fa-upload"></i> Upload File
+          </button>
+        </div>
+
+        <!-- Search, Filter, and Sort Toolbar -->
+        <div class="library-toolbar">
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="library-search" placeholder="Search files by name or content..." oninput="fetchLibraryFiles()">
+          </div>
+
+          <div class="filter-group">
+            <button class="filter-pill active" onclick="setLibraryCategory('all', this)">All</button>
+            <button class="filter-pill" onclick="setLibraryCategory('document', this)">Documents</button>
+            <button class="filter-pill" onclick="setLibraryCategory('spreadsheet', this)">Spreadsheets</button>
+            <button class="filter-pill" onclick="setLibraryCategory('presentation', this)">Slides</button>
+            <button class="filter-pill" onclick="setLibraryCategory('image', this)">Images</button>
+          </div>
+
+          <div class="sort-select-wrapper">
+            <select id="library-sort" class="select-field" onchange="fetchLibraryFiles()">
+              <option value="date_desc">Newest First</option>
+              <option value="date_asc">Oldest First</option>
+              <option value="name_asc">Name (A-Z)</option>
+              <option value="size_desc">Size (Largest)</option>
+              <option value="size_asc">Size (Smallest)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Files Grid/List View -->
+        <div id="library-files-container" class="library-grid">
+          <!-- Populated dynamically -->
+        </div>
+      </section>
+
+
+      <!-- ============================================================= -->
+      <!-- VIEW 3: PROJECTS SECTION                                       -->
+      <!-- ============================================================= -->
+      <section id="view-projects" class="app-view hidden">
+        <div class="view-header">
+          <div>
+            <h2><i class="fa-solid fa-diagram-project text-primary"></i> Projects Workspace</h2>
+            <p class="text-muted">Group conversations, files, and custom AI instructions for specific workflows</p>
+          </div>
+          <button class="btn btn-primary" onclick="openCreateProjectModal()">
+            <i class="fa-solid fa-plus"></i> New Project
+          </button>
+        </div>
+
+        <!-- Projects List Grid -->
+        <div id="projects-grid" class="projects-grid">
+          <!-- Populated dynamically -->
+        </div>
+
+        <!-- Project Detail Workspace (Active Project) -->
+        <div id="project-detail-panel" class="project-detail-card hidden">
+          <div class="project-detail-header">
+            <div>
+              <div class="project-title-badge-row">
+                <span id="proj-color-pill" class="color-dot"></span>
+                <h3 id="proj-detail-name">Python Learning Project</h3>
+              </div>
+              <p id="proj-detail-desc" class="text-muted">Mastering Python and algorithms with AI assistance</p>
+            </div>
+            <div class="project-detail-actions">
+              <button class="btn btn-secondary" onclick="startChatInProject()">
+                <i class="fa-solid fa-plus"></i> New Chat Here
+              </button>
+              <button class="btn btn-secondary" onclick="editCurrentProject()">
+                <i class="fa-solid fa-pen"></i> Edit
+              </button>
+              <button class="btn btn-danger" onclick="deleteCurrentProject()">
+                <i class="fa-regular fa-trash-can"></i> Delete
+              </button>
+            </div>
+          </div>
+
+          <!-- Project Columns: Chats & Files -->
+          <div class="project-content-grid">
+            <div class="project-column">
+              <h4><i class="fa-solid fa-comments"></i> Associated Chats</h4>
+              <div id="project-chats-list" class="project-items-list"></div>
+            </div>
+            <div class="project-column">
+              <h4><i class="fa-solid fa-file-lines"></i> Project Files</h4>
+              <div id="project-files-list" class="project-items-list"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ============================================================= -->
+      <!-- VIEW 4: SETTINGS & ACCOUNT MANAGEMENT                          -->
+      <!-- ============================================================= -->
+      <section id="view-settings" class="app-view hidden">
+        <div class="view-header">
+          <div>
+            <h2><i class="fa-solid fa-sliders text-primary"></i> Application Settings</h2>
+            <p class="text-muted">Customize your profile, security, and Google Gemini AI configuration</p>
+          </div>
+        </div>
+
+        <div class="settings-layout">
+          <!-- Settings Navigation Tabs -->
+          <div class="settings-nav">
+            <button class="settings-tab active" onclick="switchSettingsTab('account', this)">
+              <i class="fa-regular fa-user"></i> Account Profile
+            </button>
+            <button class="settings-tab" onclick="switchSettingsTab('security', this)">
+              <i class="fa-solid fa-shield-halved"></i> Security & Password
+            </button>
+            <button class="settings-tab" onclick="switchSettingsTab('ai', this)">
+              <i class="fa-solid fa-microchip"></i> AI & Gemini Config
+            </button>
+            <button class="settings-tab" onclick="switchSettingsTab('data', this)">
+              <i class="fa-solid fa-database"></i> Data & Export
+            </button>
+          </div>
+
+          <!-- Tab 1: Account Profile -->
+          <div id="tab-settings-account" class="settings-tab-pane active">
+            <div class="card-section">
+              <h3>Personal Details</h3>
+              <p class="text-muted">Update your display name and avatar</p>
+
+              <!-- Avatar Picker -->
+              <div class="form-group">
+                <label>Choose Avatar</label>
+                <div class="avatar-selection-grid">
+                  <div class="avatar-option active" data-avatar="avatar-1" onclick="selectAvatar('avatar-1', this)">🧑‍💻</div>
+                  <div class="avatar-option" data-avatar="avatar-2" onclick="selectAvatar('avatar-2', this)">🚀</div>
+                  <div class="avatar-option" data-avatar="avatar-3" onclick="selectAvatar('avatar-3', this)">🧠</div>
+                  <div class="avatar-option" data-avatar="avatar-4" onclick="selectAvatar('avatar-4', this)">⚡</div>
+                  <div class="avatar-option" data-avatar="avatar-5" onclick="selectAvatar('avatar-5', this)">🎨</div>
+                  <div class="avatar-option" data-avatar="avatar-6" onclick="selectAvatar('avatar-6', this)">🔮</div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="settings-name">Full Name</label>
+                <input type="text" id="settings-name" class="input-field" placeholder="Your Full Name">
+              </div>
+
+              <div class="form-group">
+                <label for="settings-email">Email Address</label>
+                <input type="email" id="settings-email" class="input-field" placeholder="you@example.com">
+              </div>
+
+              <button class="btn btn-primary" onclick="saveProfileSettings()">
+                <i class="fa-solid fa-floppy-disk"></i> Save Profile
+              </button>
+            </div>
+          </div>
+
+          <!-- Tab 2: Security & Password -->
+          <div id="tab-settings-security" class="settings-tab-pane hidden">
+            <div class="card-section">
+              <h3>Change Password</h3>
+              <p class="text-muted">Ensure your account is using a long, random password to stay secure.</p>
+
+              <div class="form-group">
+                <label for="current-password">Current Password</label>
+                <input type="password" id="current-password" class="input-field" placeholder="Enter current password">
+              </div>
+
+              <div class="form-group">
+                <label for="new-password">New Password</label>
+                <input type="password" id="new-password" class="input-field" placeholder="Minimum 8 characters" oninput="evaluatePasswordStrength(this.value, 'change-pw-meter', 'change-pw-text')">
+                <div class="strength-meter-container">
+                  <div id="change-pw-meter" class="strength-meter-bar"></div>
+                </div>
+                <div class="strength-info">
+                  <span id="change-pw-text" class="strength-label">Strength: Weak</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="confirm-new-password">Confirm New Password</label>
+                <input type="password" id="confirm-new-password" class="input-field" placeholder="Repeat new password">
+              </div>
+
+              <button class="btn btn-primary" onclick="handlePasswordChange()">
+                <i class="fa-solid fa-lock"></i> Update Password
+              </button>
+            </div>
+          </div>
+
+          <!-- Tab 3: AI Configuration & Gemini API -->
+          <div id="tab-settings-ai" class="settings-tab-pane hidden">
+            <div class="card-section">
+              <h3>Google Gemini API Configuration</h3>
+              <p class="text-muted">Connect your own Google Gemini API Key for live multimodal reasoning.</p>
+
+              <div class="form-group">
+                <div class="label-row">
+                  <label for="settings-gemini-key">Gemini API Key</label>
+                  <a href="https://aistudio.google.com/app/apikey" target="_blank" class="external-link">Get Free API Key <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                </div>
+                <div class="input-with-icon">
+                  <i class="fa-solid fa-key input-icon"></i>
+                  <input type="password" id="settings-gemini-key" class="input-field" placeholder="AIzaSy...">
+                  <button type="button" class="btn-toggle-pw" onclick="togglePasswordVisibility('settings-gemini-key', this)">
+                    <i class="fa-regular fa-eye"></i>
+                  </button>
+                </div>
+                <small class="text-muted">Key is stored locally in your private session and database.</small>
+              </div>
+
+              <div class="form-group">
+                <button class="btn btn-secondary" onclick="testGeminiConnection()">
+                  <i class="fa-solid fa-plug-circle-check"></i> Test Gemini Connection
+                </button>
+                <span id="gemini-test-status" class="test-status-pill hidden"></span>
+              </div>
+
+              <hr class="section-divider">
+
+              <h3>Model & Behavior</h3>
+
+              <div class="form-group">
+                <label for="settings-model">Model Selection</label>
+                <select id="settings-model" class="select-field">
+                  <option value="gemini-3.8-flash">Gemini 3.8 Flash (Fastest, High Throughput, 1M Context)</option>
+                  <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash Lite (Lightweight & Efficient)</option>
+                  <option value="gemini-2.5-flash">Gemini 2.5 Flash (Balanced Model)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="settings-temperature">Creativity (Temperature): <span id="temp-val">0.7</span></label>
+                <input type="range" id="settings-temperature" min="0.0" max="1.0" step="0.05" value="0.7" oninput="document.getElementById('temp-val').innerText = this.value">
+              </div>
+
+              <div class="form-group">
+                <label for="settings-system-instruction">Custom System Instructions</label>
+                <textarea id="settings-system-instruction" class="input-field" rows="3" placeholder="How would you like NexusAI to respond? (e.g. You are a senior software architect...)"></textarea>
+              </div>
+
+              <button class="btn btn-primary" onclick="saveAISettings()">
+                <i class="fa-solid fa-floppy-disk"></i> Save AI Settings
+              </button>
+            </div>
+          </div>
+
+          <!-- Tab 4: Data & Export -->
+          <div id="tab-settings-data" class="settings-tab-pane hidden">
+            <div class="card-section">
+              <h3>Export & Backup</h3>
+              <p class="text-muted">Download all conversations and message transcripts to your computer.</p>
+              <button class="btn btn-secondary" onclick="exportUserData()">
+                <i class="fa-solid fa-download"></i> Download All Conversations (JSON)
+              </button>
+            </div>
+
+            <div class="card-section danger-zone">
+              <h3>Danger Zone</h3>
+              <p class="text-muted">Clear all conversation history. This action cannot be undone.</p>
+              <button class="btn btn-danger" onclick="clearAllChatHistory()">
+                <i class="fa-solid fa-trash-can"></i> Clear All Chat History
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+
+  <!-- ================================================================= -->
+  <!-- MODALS: GLOBAL SEARCH (Ctrl + K), FILE PREVIEW, CREATE PROJECT    -->
+  <!-- ================================================================= -->
+
+  <!-- GLOBAL SEARCH MODAL (Ctrl + K) -->
+  <div id="search-modal" class="modal-dialog hidden">
+    <div class="modal-content search-modal-content">
+      <div class="search-modal-header">
+        <i class="fa-solid fa-magnifying-glass search-modal-icon"></i>
+        <input type="text" id="global-search-input" class="search-modal-input" placeholder="Search titles, messages, or files... (Type at least 2 chars)" oninput="handleGlobalSearch(this.value)">
+        <kbd class="shortcut-key">ESC</kbd>
+      </div>
+      <div id="search-results-list" class="search-results-container">
+        <div class="search-empty-state">
+          <i class="fa-regular fa-compass"></i>
+          <p>Search across all your conversations, user queries, AI responses, and uploaded documents.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILE PREVIEW MODAL -->
+  <div id="file-preview-modal" class="modal-dialog hidden">
+    <div class="modal-content file-preview-content">
+      <div class="modal-header">
+        <h3 id="preview-modal-title"><i class="fa-regular fa-file"></i> Document Preview</h3>
+        <button class="modal-close" onclick="closeModal('file-preview-modal')">&times;</button>
+      </div>
+      <div class="modal-body" id="preview-modal-body">
+        <!-- Renders preview dynamically -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('file-preview-modal')">Close</button>
+        <button id="preview-download-btn" class="btn btn-primary"><i class="fa-solid fa-download"></i> Download</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CREATE / EDIT PROJECT MODAL -->
+  <div id="project-modal" class="modal-dialog hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="project-modal-title"><i class="fa-solid fa-diagram-project text-primary"></i> Create Project</h3>
+        <button class="modal-close" onclick="closeModal('project-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="modal-proj-name">Project Name</label>
+          <input type="text" id="modal-proj-name" class="input-field" placeholder="e.g. Python Learning Project">
+        </div>
+        <div class="form-group">
+          <label for="modal-proj-desc">Description</label>
+          <input type="text" id="modal-proj-desc" class="input-field" placeholder="Brief project summary...">
+        </div>
+        <div class="form-group">
+          <label>Project Tag Color</label>
+          <div class="color-picker-row">
+            <span class="color-swatch active" style="background:#6366f1" data-color="#6366f1" onclick="selectProjectColor('#6366f1', this)"></span>
+            <span class="color-swatch" style="background:#10b981" data-color="#10b981" onclick="selectProjectColor('#10b981', this)"></span>
+            <span class="color-swatch" style="background:#f59e0b" data-color="#f59e0b" onclick="selectProjectColor('#f59e0b', this)"></span>
+            <span class="color-swatch" style="background:#ef4444" data-color="#ef4444" onclick="selectProjectColor('#ef4444', this)"></span>
+            <span class="color-swatch" style="background:#8b5cf6" data-color="#8b5cf6" onclick="selectProjectColor('#8b5cf6', this)"></span>
+            <span class="color-swatch" style="background:#06b6d4" data-color="#06b6d4" onclick="selectProjectColor('#06b6d4', this)"></span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="modal-proj-instructions">Custom System Instructions (Applied to all chats in this project)</label>
+          <textarea id="modal-proj-instructions" class="input-field" rows="3" placeholder="e.g. Always structure Python code with type annotations and docstrings."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('project-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveProjectModal()"><i class="fa-solid fa-check"></i> Save Project</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RENAME ITEM MODAL -->
+  <div id="rename-modal" class="modal-dialog hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="rename-modal-title"><i class="fa-solid fa-pen text-primary"></i> Rename</h3>
+        <button class="modal-close" onclick="closeModal('rename-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label id="rename-input-label">New Name</label>
+          <input type="text" id="rename-input" class="input-field" placeholder="Enter title...">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('rename-modal')">Cancel</button>
+        <button class="btn btn-primary" id="btn-save-rename"><i class="fa-solid fa-check"></i> Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main JavaScript App -->
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

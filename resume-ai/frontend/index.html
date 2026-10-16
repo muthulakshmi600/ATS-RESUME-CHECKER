@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ResumeAI ATS — AI-Powered Resume Checker & Optimization</title>
+  <meta name="description" content="Build a Resume That Gets Noticed. AI-Powered ATS Score Analysis, Resume Quality Auditing, and Keyword Matching." />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: {
+              DEFAULT: '#14213D',
+              900: '#0D1629',
+              800: '#14213D',
+              700: '#1F3158',
+            },
+            royal: {
+              DEFAULT: '#2563EB',
+              50: '#EFF6FF',
+              100: '#DBEAFE',
+              500: '#3B82F6',
+              600: '#2563EB',
+              700: '#1D4ED8',
+            },
+            teal: {
+              DEFAULT: '#14B8A6',
+              50: '#F0FDFA',
+              100: '#CCFBF1',
+              500: '#14B8A6',
+              600: '#0D9488',
+            },
+            brand: {
+              50: '#EFF6FF',
+              100: '#DBEAFE',
+              500: '#2563EB',
+              600: '#1D4ED8',
+              700: '#1E40AF',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Google Fonts & Custom Styles -->
+  <link rel="stylesheet" href="assets/css/styles.css" />
+
+  <!-- React 18 & Babel Standalone -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-[#F8FAFC] text-[#1E293B] min-h-screen antialiased">
+
+  <div id="root"></div>
+
+  <!-- Component & Page Scripts -->
+  <script type="text/babel" src="components/Icons.js"></script>
+  <script type="text/babel" src="components/Logo.js"></script>
+  <script type="text/babel" src="services/clientEngine.js"></script>
+  <script type="text/babel" src="services/api.js"></script>
+  <script type="text/babel" src="components/Toast.js"></script>
+  <script type="text/babel" src="components/Navbar.js"></script>
+  <script type="text/babel" src="components/Sidebar.js"></script>
+  <script type="text/babel" src="components/ScoreGauge.js"></script>
+  <script type="text/babel" src="components/MetricCard.js"></script>
+  <script type="text/babel" src="components/FileUploader.js"></script>
+  <script type="text/babel" src="components/CategoryBreakdown.js"></script>
+  <script type="text/babel" src="components/SkillTags.js"></script>
+  <script type="text/babel" src="components/SuggestionsList.js"></script>
+  <script type="text/babel" src="components/ApplyModal.js"></script>
+  <script type="text/babel" src="components/JobCard.js"></script>
+  <script type="text/babel" src="components/RecommendedJobs.js"></script>
+  <script type="text/babel" src="pages/LandingPage.js"></script>
+  <script type="text/babel" src="pages/LoginPage.js"></script>
+  <script type="text/babel" src="pages/SignUpPage.js"></script>
+  <script type="text/babel" src="pages/DashboardPage.js"></script>
+  <script type="text/babel" src="pages/CheckResumePage.js"></script>
+  <script type="text/babel" src="pages/AnalysisResultPage.js"></script>
+  <script type="text/babel" src="pages/JobsPage.js"></script>
+  <script type="text/babel" src="pages/HistoryPage.js"></script>
+  <script type="text/babel" src="pages/ProfileSettingsPage.js"></script>
+  <script type="text/babel" src="pages/SettingsPage.js"></script>
+
+  <!-- Main React Application Controller -->
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    class ErrorBoundary extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = { hasError: false, error: null };
+      }
+      static getDerivedStateFromError(error) {
+        return { hasError: true, error };
+      }
+      componentDidCatch(error, errorInfo) {
+        console.error("ErrorBoundary caught an unhandled rendering error:", error, errorInfo);
+      }
+      render() {
+        if (this.state.hasError) {
+          return (
+            <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-6">
+              <div className="bg-white border border-rose-200 rounded-2xl shadow-xl max-w-lg w-full p-8 text-center">
+                <div className="w-16 h-16 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <h2 className="text-xl font-bold text-[#14213D] mb-2">Something went wrong</h2>
+                <p className="text-sm text-slate-600 mb-6">
+                  {this.state.error?.message || "An unexpected error occurred while rendering this page."}
+                </p>
+                <div className="flex gap-3 justify-center">
+                  <button
+                    onClick={() => {
+                      this.setState({ hasError: false, error: null });
+                      window.location.reload();
+                    }}
+                    className="px-5 py-2.5 bg-[#2563EB] text-white font-semibold rounded-xl hover:bg-[#1D4ED8] transition-colors shadow-sm text-sm"
+                  >
+                    Reload Page
+                  </button>
+                  <button
+                    onClick={() => {
+                      try { localStorage.removeItem('resumeai_last_analysis'); } catch(e){}
+                      this.setState({ hasError: false, error: null });
+                      window.location.href = '/';
+                    }}
+                    className="px-5 py-2.5 bg-slate-100 text-slate-700 font-semibold rounded-xl hover:bg-slate-200 transition-colors text-sm"
+                  >
+                    Reset & Go Home
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        }
+        return this.props.children;
+      }
+    }
+
+    function App() {
+      // Routing state: 'landing' | 'login' | 'signup' | 'dashboard' | 'check-resume' | 'analysis-result' | 'history' | 'profile' | 'settings'
+      const [currentPage, setCurrentPage] = useState('landing');
+      const [currentUser, setCurrentUser] = useState(null);
+      const [currentAnalysis, setCurrentAnalysis] = useState(() => {
+        try {
+          const cached = localStorage.getItem('resumeai_last_analysis');
+          return cached ? JSON.parse(cached) : null;
+        } catch (e) {
+          return null;
+        }
+      });
+      const [toast, setToast] = useState(null);
+      const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+      useEffect(() => {
+        // Hydrate current user from service
+        const user = window.ResumeAIService.getCurrentUser();
+        if (user) {
+          setCurrentUser(user);
+        }
+      }, []);
+
+      const showToast = (message, type = 'success') => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 4000);
+      };
+
+      const handleNavigate = (page) => {
+        setMobileMenuOpen(false);
+        // If navigating to authenticated pages without login, default to login
+        const authRequiredPages = ['dashboard', 'check-resume', 'jobs', 'history', 'profile', 'settings'];
+        if (authRequiredPages.includes(page) && !currentUser) {
+          // Allow smooth transition: if checking resume, dashboard, jobs, settings, or profile, permit demo experience
+          if (['check-resume', 'dashboard', 'jobs', 'settings', 'profile'].includes(page)) {
+            // Auto login as demo user if not logged in
+            const demo = { email: 'test@gmail.com', name: 'Demo Candidate', bio: 'Software Developer' };
+            window.ResumeAIService.setCurrentUser(demo);
+            setCurrentUser(demo);
+            setCurrentPage(page);
+            return;
+          }
+          setCurrentPage('login');
+          return;
+        }
+        setCurrentPage(page);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+
+      const handleLoginSuccess = (user) => {
+        setCurrentUser(user);
+      };
+
+      const handleLogout = () => {
+        window.ResumeAIService.logout();
+        setCurrentUser(null);
+        showToast('Logged out successfully.', 'info');
+        setCurrentPage('landing');
+      };
+
+      const handleAnalysisComplete = (analysisData) => {
+        try {
+          if (analysisData) {
+            localStorage.setItem('resumeai_last_analysis', JSON.stringify(analysisData));
+          }
+        } catch (e) {}
+        setCurrentAnalysis(analysisData);
+        setCurrentPage('analysis-result');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+
+      const handleViewAnalysis = (analysisData) => {
+        try {
+          if (analysisData) {
+            localStorage.setItem('resumeai_last_analysis', JSON.stringify(analysisData));
+          }
+        } catch (e) {}
+        setCurrentAnalysis(analysisData);
+        setCurrentPage('analysis-result');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+
+      // Determine layout: Public pages use Navbar, Authenticated pages use Sidebar layout
+      const isPublicPage = ['landing', 'login', 'signup'].includes(currentPage);
+
+      return (
+        <div className="min-h-screen bg-[#F8FAFC] text-[#1E293B] flex flex-col selection:bg-[#2563EB] selection:text-white">
+          
+          {/* Public Page View */}
+          {isPublicPage ? (
+            <>
+              <window.Navbar
+                currentPage={currentPage}
+                onNavigate={handleNavigate}
+                currentUser={currentUser}
+                onLogout={handleLogout}
+              />
+
+              <main className="flex-1">
+                {currentPage === 'landing' && (
+                  <window.LandingPage
+                    onNavigate={handleNavigate}
+                    currentUser={currentUser}
+                  />
+                )}
+                {currentPage === 'login' && (
+                  <window.LoginPage
+                    onNavigate={handleNavigate}
+                    onLoginSuccess={handleLoginSuccess}
+                    showToast={showToast}
+                  />
+                )}
+                {currentPage === 'signup' && (
+                  <window.SignUpPage
+                    onNavigate={handleNavigate}
+                    showToast={showToast}
+                  />
+                )}
+              </main>
+            </>
+          ) : (
+            /* Authenticated App View with Sidebar */
+            <div className="flex min-h-screen bg-[#F8FAFC]">
+              
+              {/* Desktop Sidebar */}
+              <div className="hidden md:block">
+                <window.Sidebar
+                  currentPage={currentPage}
+                  onNavigate={handleNavigate}
+                  currentUser={currentUser}
+                  onLogout={handleLogout}
+                />
+              </div>
+
+              {/* Mobile Header Bar */}
+              <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-slate-200 px-4 h-16 flex items-center justify-between shadow-sm">
+                <div 
+                  onClick={() => handleNavigate('dashboard')}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <window.Logo isDark={false} size="sm" />
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    className="p-2 text-slate-600 hover:text-slate-900 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* Mobile Drawer Menu */}
+              {mobileMenuOpen && (
+                <div className="md:hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex">
+                  <div className="w-72 bg-white h-full p-6 flex flex-col justify-between shadow-2xl">
+                    <div>
+                      <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+                        <window.Logo isDark={false} size="sm" />
+                        <button onClick={() => setMobileMenuOpen(false)} className="p-2 text-slate-500 hover:text-slate-800">
+                          ✕
+                        </button>
+                      </div>
+                      <nav className="mt-6 space-y-2">
+                        {[
+                          { id: 'dashboard', label: 'Dashboard' },
+                          { id: 'check-resume', label: 'Check Resume' },
+                          { id: 'jobs', label: 'Job Search' },
+                          { id: 'history', label: 'Resume History' },
+                          { id: 'profile', label: 'Profile' },
+                          { id: 'settings', label: 'Settings' },
+                          { id: 'landing', label: 'Landing Page' },
+                        ].map(item => (
+                          <button
+                            key={item.id}
+                            onClick={() => handleNavigate(item.id)}
+                            className="w-full text-left py-2.5 px-3 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-[#2563EB] transition-colors"
+                          >
+                            {item.label}
+                          </button>
+                        ))}
+                      </nav>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full py-2.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 font-bold border border-rose-200 text-sm transition-colors"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                  <div className="flex-1" onClick={() => setMobileMenuOpen(false)}></div>
+                </div>
+              )}
+
+              {/* Main App Content Area */}
+              <main className="flex-1 min-w-0 pt-20 md:pt-0 p-4 sm:p-6 lg:p-10 overflow-y-auto">
+                <div className="max-w-6xl mx-auto">
+                  {currentPage === 'dashboard' && (
+                    <window.DashboardPage
+                      onNavigate={handleNavigate}
+                      currentUser={currentUser}
+                      onViewAnalysis={handleViewAnalysis}
+                    />
+                  )}
+                  {currentPage === 'check-resume' && (
+                    <window.CheckResumePage
+                      onNavigate={handleNavigate}
+                      onAnalysisComplete={handleAnalysisComplete}
+                      showToast={showToast}
+                      currentUser={currentUser}
+                    />
+                  )}
+                  {currentPage === 'analysis-result' && (
+                    <window.AnalysisResultPage
+                      analysis={currentAnalysis}
+                      onNavigate={handleNavigate}
+                      onRecheck={() => handleNavigate('check-resume')}
+                      showToast={showToast}
+                      currentUser={currentUser}
+                    />
+                  )}
+                  {currentPage === 'jobs' && (
+                    <window.JobsPage
+                      onNavigate={handleNavigate}
+                      showToast={showToast}
+                      currentUser={currentUser}
+                      currentAnalysis={currentAnalysis}
+                    />
+                  )}
+                  {currentPage === 'history' && (
+                    <window.HistoryPage
+                      onNavigate={handleNavigate}
+                      onViewAnalysis={handleViewAnalysis}
+                      showToast={showToast}
+                    />
+                  )}
+                  {currentPage === 'profile' && (
+                    <window.ProfileSettingsPage
+                      currentUser={currentUser}
+                      onUserUpdate={setCurrentUser}
+                      showToast={showToast}
+                      onNavigate={handleNavigate}
+                    />
+                  )}
+                  {currentPage === 'settings' && (
+                    <window.SettingsPage
+                      onNavigate={handleNavigate}
+                      showToast={showToast}
+                    />
+                  )}
+                </div>
+              </main>
+
+            </div>
+          )}
+
+          {/* Toast Notification Container */}
+          {toast && (
+            <window.Toast
+              message={toast.message}
+              type={toast.type}
+              onClose={() => setToast(null)}
+            />
+          )}
+
+        </div>
+      );
+    }
+
+    // Mount to DOM with ErrorBoundary protection
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    );
+  </script>
+
+</body>
+</html>

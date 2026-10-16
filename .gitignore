@@ -1,0 +1,52 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Environment variables & secrets
+.env
+.env.*
+*.env
+*.key
+*.pem
+credentials.json
+client_secrets.json
+
+# SQLite databases & transient runtime data
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploaded candidate resumes and user files (protects private user resumes and PII)
+uploads/*
+!uploads/.gitkeep
+*/uploads/*
+!*/uploads/.gitkeep
+*/*/uploads/*
+!*/*/uploads/.gitkeep
+
+# Node / Frontend dependencies & logs
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor & OS files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+*.log

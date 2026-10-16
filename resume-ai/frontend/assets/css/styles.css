@@ -1,0 +1,179 @@
+/* ==========================================================================
+   ResumeAI ATS — Professional AI SaaS Theme Stylesheet
+   Color Palette:
+   - Primary: Deep Navy (#14213D)
+   - Secondary: Royal Blue (#2563EB)
+   - Accent: Teal (#14B8A6)
+   - Background: Light Gray (#F8FAFC)
+   - Cards: White (#FFFFFF)
+   - Main Text: Dark Slate (#1E293B)
+   - Secondary Text: Slate Gray (#64748B)
+   - Success Indicators: Green (#16A34A)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --primary: #14213D;
+  --secondary: #2563EB;
+  --secondary-hover: #1D4ED8;
+  --secondary-light: #EFF6FF;
+  --accent: #14B8A6;
+  --accent-light: #F0FDFA;
+  --bg: #F8FAFC;
+  --card: #FFFFFF;
+  --text-main: #1E293B;
+  --text-secondary: #64748B;
+  --text-muted: #94A3B8;
+  --success: #16A34A;
+  --success-light: #F0FDF4;
+  --border: #E2E8F0;
+  --border-subtle: #F1F5F9;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg);
+  color: var(--text-main);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+code, pre, .font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Base Card & Container Overrides for Crisp AI SaaS Theme */
+.saas-card {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 1px 2px -1px rgba(15, 23, 42, 0.05);
+}
+
+.saas-card-elevated {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 1.25rem;
+  box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.05), 0 4px 6px -4px rgba(15, 23, 42, 0.03);
+}
+
+/* Custom Interactive SaaS Buttons */
+.btn-primary {
+  background-color: var(--secondary);
+  color: #FFFFFF;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  padding: 0.65rem 1.25rem;
+  transition: all 0.15s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-primary:hover {
+  background-color: var(--secondary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+.btn-secondary {
+  background-color: #FFFFFF;
+  color: var(--primary);
+  border: 1px solid var(--border);
+  font-weight: 600;
+  border-radius: 0.75rem;
+  padding: 0.65rem 1.25rem;
+  transition: all 0.15s ease-in-out;
+}
+
+.btn-secondary:hover {
+  background-color: var(--border-subtle);
+  border-color: #CBD5E1;
+}
+
+/* Clean Input Styling */
+.saas-input {
+  background-color: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  color: var(--text-main);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  width: 100%;
+}
+
+.saas-input:focus {
+  outline: none;
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* Custom animations */
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spinSlow 8s linear infinite;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Subtle modern scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Print styles for resume report */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+
+  aside, header, nav, button, .print\:hidden {
+    display: none !important;
+  }
+
+  .print\:p-0 {
+    padding: 0 !important;
+  }
+
+  .print\:m-0 {
+    margin: 0 !important;
+  }
+
+  .saas-card, .saas-card-elevated {
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: none !important;
+  }
+}

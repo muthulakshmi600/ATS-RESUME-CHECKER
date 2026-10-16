@@ -1,0 +1,246 @@
+/* ==========================================================================
+   Fresher ATS Resume Analyzer - Modern Professional Design System
+   Tailored for Freshers & Entry-Level Job Seekers
+   ========================================================================== */
+
+/* Main Container & Font Tweaks */
+.main .block-container {
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+    max-width: 1200px;
+}
+
+/* Header Styles */
+.app-header {
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0f172a 100%);
+    border-radius: 14px;
+    color: #ffffff;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.app-header h1 {
+    font-size: 2.3rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.5px;
+    color: #ffffff;
+}
+
+.app-header .tagline {
+    font-size: 1.1rem;
+    color: #cbd5e1;
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+.app-header .fresher-badge {
+    display: inline-block;
+    background: rgba(37, 99, 235, 0.35);
+    border: 1px solid rgba(96, 165, 250, 0.4);
+    color: #93c5fd;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.3rem 0.9rem;
+    border-radius: 9999px;
+    letter-spacing: 0.5px;
+}
+
+/* Feature Cards Grid (Landing Page) */
+.feature-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    height: 100%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+    border-color: #93c5fd;
+}
+
+.feature-card-icon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+    display: inline-block;
+}
+
+.feature-card h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+}
+
+.feature-card p {
+    font-size: 0.9rem;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+/* Stats Metric Cards (Dashboard) */
+.metric-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.metric-card-blue { border-left: 4px solid #2563eb; background: linear-gradient(180deg, #ffffff 0%, #f0f7ff 100%); }
+.metric-card-green { border-left: 4px solid #059669; background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%); }
+.metric-card-amber { border-left: 4px solid #d97706; background: linear-gradient(180deg, #ffffff 0%, #fffbeb 100%); }
+.metric-card-purple { border-left: 4px solid #7c3aed; background: linear-gradient(180deg, #ffffff 0%, #faf5ff 100%); }
+
+.metric-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.metric-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.1;
+}
+
+/* Score Banner on Results Page */
+.score-hero-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.score-box-main {
+    flex: 1;
+    min-width: 280px;
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+    border-radius: 14px;
+    padding: 1.75rem;
+    color: #ffffff;
+    text-align: center;
+    box-shadow: 0 8px 20px -3px rgba(37, 99, 235, 0.3);
+}
+
+.score-box-match {
+    flex: 1;
+    min-width: 280px;
+    background: linear-gradient(135deg, #065f46 0%, #059669 100%);
+    border-radius: 14px;
+    padding: 1.75rem;
+    color: #ffffff;
+    text-align: center;
+    box-shadow: 0 8px 20px -3px rgba(5, 150, 105, 0.3);
+}
+
+.score-number {
+    font-size: 3.5rem;
+    font-weight: 900;
+    line-height: 1;
+    margin: 0.5rem 0;
+}
+
+.score-subtitle {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 500;
+}
+
+/* Breakdown Table / List Styling */
+.breakdown-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.65rem 1rem;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+}
+
+.breakdown-label {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #1e293b;
+}
+
+.breakdown-score {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #2563eb;
+    background: #eff6ff;
+    padding: 0.25rem 0.65rem;
+    border-radius: 6px;
+    border: 1px solid #bfdbfe;
+}
+
+/* Tags & Badges */
+.skill-badge {
+    display: inline-block;
+    padding: 0.3rem 0.65rem;
+    margin: 0.2rem 0.25rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.skill-matched {
+    background-color: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.skill-missing {
+    background-color: #fffbeb;
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+
+.checklist-item {
+    padding: 0.5rem 0.75rem;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 0.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.suggestion-box {
+    background: #f8fafc;
+    border-left: 4px solid #2563eb;
+    padding: 0.9rem 1.1rem;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 0.75rem;
+    font-size: 0.92rem;
+    color: #334155;
+    line-height: 1.5;
+}
+
+/* Notice & Disclaimer Box */
+.notice-box {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+    font-size: 0.82rem;
+    color: #475569;
+    margin-top: 1rem;
+    line-height: 1.45;
+}

@@ -1,0 +1,27 @@
+JOB TITLE:
+Junior Python Developer
+
+JOB DESCRIPTION:
+We are seeking a motivated and talented Junior Python Developer to join our engineering team. In this role, you will help design, build, and maintain web applications and data processing pipelines.
+
+Key Responsibilities:
+- Develop server-side web applications using Python and Flask.
+- Design and integrate relational database schemas using SQLite and PostgreSQL.
+- Build clean, responsive, and accessible user interfaces using HTML5, CSS3, and modern JavaScript.
+- Create and consume REST APIs for frontend-backend communication.
+- Collaborate with the team using Git and GitHub for version control and code reviews.
+- Clean, analyze, and process tabular datasets using Pandas and NumPy.
+- Write unit tests, conduct debugging, and participate in Agile development sprints.
+
+Requirements & Qualifications:
+- Bachelor's degree in Computer Science, Software Engineering, or equivalent practical experience.
+- Strong foundational understanding of Python and Object-Oriented Programming (OOP).
+- Hands-on experience with web frameworks such as Flask or Django.
+- Solid understanding of SQL, database modeling, and queries.
+- Working knowledge of frontend technologies: HTML, CSS, JavaScript.
+- Familiarity with version control using Git and GitHub.
+- Good problem-solving mindset and eagerness to learn new technologies.
+
+Nice to Have:
+- Experience with Docker, Linux, or cloud deployments on AWS.
+- Knowledge of machine learning basics and scikit-learn.

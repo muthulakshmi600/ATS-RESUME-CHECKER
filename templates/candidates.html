@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+
+{% block title %}Candidate Management - ATS Recruiter Pro{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Candidate Pipeline</h1>
+            <p class="page-subtitle">Manage applicants, inspect similarity scores, explore missing skill roadmaps, and update stages.</p>
+        </div>
+        <div class="header-actions">
+            <a href="{{ url_for('upload_page') }}" class="btn btn-primary">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Add Candidate Resume
+            </a>
+        </div>
+    </div>
+
+    <!-- Colorful Target Job Roles Filter Bar -->
+    {% if job_stats %}
+    <div class="role-chips-bar">
+        <span class="role-chips-label">Target Job Roles:</span>
+        <a href="{{ url_for('candidates_page', search=search_query, status=status_filter) }}" 
+           class="role-chip {% if not job_filter or job_filter == 'All' %}active{% endif %}">
+            All Job Roles <span class="role-chip-count">{{ candidates|length }}</span>
+        </a>
+        {% for js in job_stats %}
+            <a href="{{ url_for('candidates_page', job_id=js.id, search=search_query, status=status_filter, missing_skill=missing_skill_filter) }}" 
+               class="role-chip {% if job_filter|string == js.id|string %}active{% endif %}">
+                <span class="role-dot" style="background-color: {{ js.role_style.color }};"></span>
+                {{ js.title }} 
+                <span class="role-chip-count">{{ js.count }}</span>
+            </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Search & Filter Controls -->
+    <section class="card filter-card">
+        <form method="GET" action="{{ url_for('candidates_page') }}" class="filter-form" id="filterForm">
+            <div class="filter-row">
+                <!-- Search Input -->
+                <div class="filter-group search-group">
+                    <label for="search" class="filter-label">Search Candidate / Skills</label>
+                    <div class="input-with-icon">
+                        <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        <input type="text" id="search" name="search" value="{{ search_query }}" class="form-input" placeholder="Search by name, skill (e.g. Python, Docker, SQL)...">
+                    </div>
+                </div>
+
+                <!-- Status Filter -->
+                <div class="filter-group">
+                    <label for="status" class="filter-label">Application Status</label>
+                    <select id="status" name="status" class="form-select" onchange="document.getElementById('filterForm').submit();">
+                        <option value="All" {% if status_filter == 'All' or not status_filter %}selected{% endif %}>All Statuses</option>
+                        <option value="Shortlisted" {% if status_filter == 'Shortlisted' %}selected{% endif %}>Shortlisted</option>
+                        <option value="Reviewing" {% if status_filter == 'Reviewing' %}selected{% endif %}>Reviewing</option>
+                        <option value="Rejected" {% if status_filter == 'Rejected' %}selected{% endif %}>Rejected</option>
+                    </select>
+                </div>
+
+                <!-- Target Job Filter -->
+                <div class="filter-group">
+                    <label for="job_id" class="filter-label">Filter by Target Job</label>
+                    <select id="job_id" name="job_id" class="form-select" onchange="document.getElementById('filterForm').submit();">
+                        <option value="All" {% if job_filter == 'All' or not job_filter %}selected{% endif %}>All Roles</option>
+                        {% for job in jobs %}
+                            <option value="{{ job.id }}" {% if job_filter|string == job.id|string %}selected{% endif %}>{{ job.title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Missing Skill Filter (Feature Request) -->
+                <div class="filter-group">
+                    <label for="missing_skill" class="filter-label">Filter by Missing Skill</label>
+                    <select id="missing_skill" name="missing_skill" class="form-select" onchange="document.getElementById('filterForm').submit();">
+                        <option value="All" {% if not missing_skill_filter or missing_skill_filter == 'All' %}selected{% endif %}>All Missing Skills</option>
+                        {% for ms in all_missing_skills %}
+                            <option value="{{ ms }}" {% if missing_skill_filter == ms %}selected{% endif %}>Missing: {{ ms }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Buttons -->
+                <div class="filter-actions">
+                    <button type="submit" class="btn btn-secondary">Filter</button>
+                    {% if search_query or (status_filter and status_filter != 'All') or (job_filter and job_filter != 'All') or (missing_skill_filter and missing_skill_filter != 'All') %}
+                        <a href="{{ url_for('candidates_page') }}" class="btn btn-link">Reset</a>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <!-- Candidates Table -->
+    <section class="card mt-4">
+        <div class="card-header flex-between">
+            <div>
+                <h2 class="card-title">Applicants List ({{ candidates|length }})</h2>
+                <p class="card-subtitle">Candidates sorted by highest match score with rich role &amp; skill indicators</p>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="data-table" id="candidatesTable">
+                <thead>
+                    <tr>
+                        <th>Candidate</th>
+                        <th>Target Job Role</th>
+                        <th>Match Score</th>
+                        <th>Matched Skills</th>
+                        <th>Missing Skills &amp; Gaps</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if candidates %}
+                        {% for c in candidates %}
+                            <tr data-status="{{ c.status }}" data-name="{{ c.name|lower }}" data-skills="{{ (c.matched_skills|join(' '))|lower }}" data-missing="{{ (c.missing_skills|join(' '))|lower }}">
+                                <!-- Name & Contact -->
+                                <td>
+                                    <div class="candidate-meta">
+                                        <a href="{{ url_for('candidate_detail', candidate_id=c.id) }}" class="candidate-name-link">
+                                            {{ c.name }}
+                                        </a>
+                                        <div class="candidate-contact">
+                                            {% if c.email %}
+                                                <span>{{ c.email }}</span>
+                                            {% endif %}
+                                            {% if c.phone %}
+                                                <span>&bull; {{ c.phone }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Colorful Target Job Role Badge -->
+                                <td>
+                                    <span class="role-badge {{ c.role_style.class_name }}" title="Role Category: {{ c.role_style.category }}">
+                                        <span class="role-dot"></span>
+                                        {{ c.job_title }}
+                                    </span>
+                                </td>
+
+                                <!-- Match Score -->
+                                <td>
+                                    <div class="score-pill-container">
+                                        <span class="score-badge {% if c.match_percentage >= 60 %}score-high{% elif c.match_percentage >= 35 %}score-mid{% else %}score-low{% endif %}">
+                                            {{ c.match_percentage }}%
+                                        </span>
+                                        <div class="mini-progress-bar">
+                                            <div class="mini-progress-fill {% if c.match_percentage >= 60 %}fill-high{% elif c.match_percentage >= 35 %}fill-mid{% else %}fill-low{% endif %}" style="width: {{ c.match_percentage }}%;"></div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Matched Skills -->
+                                <td>
+                                    <div class="table-skills-tags">
+                                        {% if c.matched_skills %}
+                                            {% for skill in c.matched_skills[:4] %}
+                                                <span class="tag-pill tag-matched">{{ skill }}</span>
+                                            {% endfor %}
+                                            {% if c.matched_skills|length > 4 %}
+                                                <span class="tag-pill tag-more">+{{ c.matched_skills|length - 4 }}</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-muted-sm">None detected</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+
+                                <!-- Missing Skills with Priority Tags & Hover Details -->
+                                <td>
+                                    <div class="table-skills-tags">
+                                        {% if c.missing_skills_detailed %}
+                                            {% for ms in c.missing_skills_detailed[:3] %}
+                                                <span class="tag-pill {% if ms.priority in ['Critical', 'Core'] %}tag-missing{% else %}tag-pill-amber{% endif %}" 
+                                                      title="[{{ ms.priority }}] Study topics: {{ ms.topics }} | Interview Question: {{ ms.interview_question }}">
+                                                    {% if ms.priority in ['Critical', 'Core'] %}⚠️{% endif %} {{ ms.name }}
+                                                </span>
+                                            {% endfor %}
+                                            {% if c.missing_skills_detailed|length > 3 %}
+                                                <a href="{{ url_for('candidate_detail', candidate_id=c.id) }}" class="tag-pill tag-more" title="View all missing skills and learning roadmaps">
+                                                    +{{ c.missing_skills_detailed|length - 3 }} more
+                                                </a>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-green-sm">✓ No skill gaps!</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+
+                                <!-- Status Dropdown -->
+                                <td>
+                                    <form action="{{ url_for('update_status', candidate_id=c.id) }}" method="POST" class="status-form">
+                                        <select name="status" class="status-select status-select-{{ c.status.lower() }}" onchange="this.form.submit();">
+                                            <option value="Reviewing" {% if c.status == 'Reviewing' %}selected{% endif %}>Reviewing</option>
+                                            <option value="Shortlisted" {% if c.status == 'Shortlisted' %}selected{% endif %}>Shortlisted</option>
+                                            <option value="Rejected" {% if c.status == 'Rejected' %}selected{% endif %}>Rejected</option>
+                                        </select>
+                                    </form>
+                                </td>
+
+                                <!-- Actions -->
+                                <td>
+                                    <div class="action-btn-group">
+                                        <a href="{{ url_for('candidate_detail', candidate_id=c.id) }}" class="btn btn-icon" title="View Full Extracted Text &amp; Upskill Roadmap">
+                                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            </svg>
+                                        </a>
+                                        <button type="button" class="btn btn-icon" onclick="copyCandidateFeedbackQuick('{{ c.id }}', this)" title="Quick-copy candidate constructive feedback email">
+                                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
+                                            </svg>
+                                        </button>
+                                        <a href="{{ url_for('download_file', filename=c.filename) }}" class="btn btn-icon" title="Download Original Resume File" target="_blank">
+                                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                            </svg>
+                                        </a>
+                                        <form action="{{ url_for('delete_candidate', candidate_id=c.id) }}" method="POST" onsubmit="return confirm('Remove candidate {{ c.name }}?');" style="display:inline;">
+                                            <button type="submit" class="btn btn-icon btn-icon-danger" title="Delete Candidate">
+                                                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="empty-state">
+                                <p>No matching candidates found.</p>
+                                <a href="{{ url_for('upload_page') }}" class="btn btn-sm btn-primary">Upload a Candidate Resume</a>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+{% endblock %}

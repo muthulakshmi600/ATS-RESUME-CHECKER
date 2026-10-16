@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block title %}Job Descriptions &amp; Target Roles - ATS Recruiter Pro{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Target Job Openings &amp; Benchmarks</h1>
+            <p class="page-subtitle">Create role requirements, set hiring bars, auto-extract technical skills, and manage recruitment pipelines.</p>
+        </div>
+    </div>
+
+    <div class="dashboard-columns">
+        <!-- New Target Job Creation Form -->
+        <section class="card content-column-side">
+            <div class="card-header">
+                <h2 class="card-title">Create Target Job Opening</h2>
+            </div>
+            
+            <form action="{{ url_for('job_page') }}" method="POST" class="ats-form">
+                <div class="form-group">
+                    <label for="title" class="form-label">Job Title <span class="required">*</span></label>
+                    <input type="text" id="title" name="title" class="form-input" placeholder="e.g., Senior Python Backend Developer" required>
+                    <small class="form-hint">Role title will be automatically categorized with colorful branding.</small>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="experience_level" class="form-label">Experience Level</label>
+                        <select id="experience_level" name="experience_level" class="form-select">
+                            <option value="Junior / Mid Level" selected>Junior / Mid Level (1-3 yrs)</option>
+                            <option value="Entry Level (0-1 yr)">Entry Level (0-1 yr)</option>
+                            <option value="Senior Level (4-7 yrs)">Senior Level (4-7 yrs)</option>
+                            <option value="Lead / Principal (8+ yrs)">Lead / Principal (8+ yrs)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label for="job_type" class="form-label">Workplace Type</label>
+                        <select id="job_type" name="job_type" class="form-select">
+                            <option value="Full-time" selected>Full-time (On-site)</option>
+                            <option value="Remote">100% Remote</option>
+                            <option value="Hybrid">Hybrid</option>
+                            <option value="Contract">Contract / Project</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="salary_range" class="form-label">Salary / Budget Range</label>
+                        <input type="text" id="salary_range" name="salary_range" class="form-input" placeholder="e.g., $75k - $95k or ₹8 - 14 LPA" value="Competitive">
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label for="min_score_threshold" class="form-label">Hiring Bar Min Match (%)</label>
+                        <input type="number" id="min_score_threshold" name="min_score_threshold" class="form-input" min="10" max="100" value="40">
+                        <small class="form-hint">Scores above this qualify as ⭐ Qualified.</small>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description" class="form-label">Job Description &amp; Requirements <span class="required">*</span></label>
+                    <textarea id="description" name="description" class="form-textarea" rows="8" placeholder="Paste the complete job description, technical requirements, stack, and responsibilities here..." required></textarea>
+                    <small class="form-hint">Our engine will automatically scan and detect required technical skills to display on this job opening!</small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Publish Target Job Opening
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Existing Job Openings Cards List -->
+        <section class="card content-column-main">
+            <div class="card-header flex-between">
+                <div>
+                    <h2 class="card-title">Target Job Openings ({{ jobs|length }})</h2>
+                    <p class="card-subtitle">Roles configured with hiring benchmarks and candidate pipelines</p>
+                </div>
+            </div>
+
+            <!-- Target Job Status Filter Tabs -->
+            <div class="role-chips-bar" style="margin-bottom: 16px;">
+                <span class="chips-label">Filter by Status:</span>
+                <a href="{{ url_for('job_page', status='All') }}" class="role-chip {% if current_status == 'All' %}active{% endif %}">
+                    All Roles ({{ status_counts.All }})
+                </a>
+                <a href="{{ url_for('job_page', status='Active') }}" class="role-chip {% if current_status == 'Active' %}active{% endif %}">
+                    🟢 Active ({{ status_counts.Active }})
+                </a>
+                <a href="{{ url_for('job_page', status='Paused') }}" class="role-chip {% if current_status == 'Paused' %}active{% endif %}">
+                    🟡 Paused ({{ status_counts.Paused }})
+                </a>
+                <a href="{{ url_for('job_page', status='Closed') }}" class="role-chip {% if current_status == 'Closed' %}active{% endif %}">
+                    ⚪ Closed ({{ status_counts.Closed }})
+                </a>
+            </div>
+
+            <div class="jobs-accordion">
+                {% if jobs %}
+                    {% for job in jobs %}
+                        <div class="job-card" style="border-top: 5px solid {{ job.role_style.color }};">
+                            <div class="job-card-header">
+                                <div>
+                                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                        <h3 class="job-card-title">
+                                            <a href="{{ url_for('job_detail_page', job_id=job.id) }}" style="color: inherit;">
+                                                {{ job.title }}
+                                            </a>
+                                        </h3>
+                                        <span class="role-badge {{ job.role_style.class_name }}">
+                                            <span class="role-dot"></span>
+                                            {{ job.role_style.category }}
+                                        </span>
+                                        <span class="badge {% if job.status == 'Active' %}badge-success{% elif job.status == 'Paused' %}badge-warning{% else %}badge-light{% endif %}">
+                                            {{ job.status }}
+                                        </span>
+                                    </div>
+
+                                    <!-- Job Metadata Tags -->
+                                    <div class="job-meta-row mt-1">
+                                        <span class="meta-tag">Level: <strong>{{ job.experience_level }}</strong></span>
+                                        <span class="meta-tag">Type: <strong>{{ job.job_type }}</strong></span>
+                                        <span class="meta-tag">Salary: <strong>{{ job.salary_range }}</strong></span>
+                                        <span class="meta-tag">Bar: <strong>Min {{ job.min_score_threshold }}%</strong></span>
+                                        <span class="meta-tag">Posted {{ job.created_at[:10] }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="job-card-badges" style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                    <span class="badge badge-primary">{{ job.candidate_count }} Applicant{% if job.candidate_count != 1 %}s{% endif %}</span>
+                                    {% if job.candidate_count > 0 %}
+                                        <span class="badge badge-success">✓ {{ job.shortlisted_count or 0 }} Shortlisted</span>
+                                        <span class="badge" style="background: #fffbeb; color: #d97706; border: 1px solid #fde68a;">{{ job.reviewing_count or 0 }} In Review</span>
+                                        <span class="badge" style="background: #f1f5f9; color: #475569;">Avg Match: {{ job.avg_match }}%</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Top Candidate Highlight & Auto-detected Skills -->
+                            {% if job.top_candidate %}
+                                <div class="top-candidate-banner mt-2">
+                                    <span class="top-cand-star">⭐ Top Candidate:</span>
+                                    <strong>{{ job.top_candidate.name }}</strong> &mdash; 
+                                    <span class="text-green font-weight-bold">{{ job.top_candidate.match_percentage }}% Match Score</span>
+                                </div>
+                            {% endif %}
+
+                            <!-- Required Skills Chips -->
+                            {% if job.required_skills %}
+                                <div class="mt-2 mb-2">
+                                    <div class="table-skills-tags">
+                                        <span class="text-muted-sm" style="margin-right: 4px;">Detected Requirements:</span>
+                                        {% for s in job.required_skills[:6] %}
+                                            <span class="tag-pill tag-matched">{{ s }}</span>
+                                        {% endfor %}
+                                        {% if job.required_skills|length > 6 %}
+                                            <span class="tag-pill tag-more">+{{ job.required_skills|length - 6 }} more</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="job-card-body">
+                                <div class="job-desc-preview" style="max-height: 120px;">
+                                    {{ job.description }}
+                                </div>
+                            </div>
+                            
+                            <div class="job-card-actions mt-2">
+                                <a href="{{ url_for('job_detail_page', job_id=job.id) }}" class="btn btn-sm btn-primary">
+                                    View Pipeline &amp; Ranked Applicants ({{ job.candidate_count }})
+                                </a>
+                                <a href="{{ url_for('upload_page', job_id=job.id) }}" class="btn btn-sm btn-outline">
+                                    Upload Resume for this Role
+                                </a>
+                                
+                                <!-- Quick Status Changer -->
+                                <form action="{{ url_for('update_job_status', job_id=job.id) }}" method="POST" style="display:inline;">
+                                    <select name="status" class="form-select form-select-sm" onchange="this.form.submit();" style="width: auto; display: inline-block;">
+                                        <option value="Active" {% if job.status == 'Active' %}selected{% endif %}>Active</option>
+                                        <option value="Paused" {% if job.status == 'Paused' %}selected{% endif %}>Paused</option>
+                                        <option value="Closed" {% if job.status == 'Closed' %}selected{% endif %}>Closed</option>
+                                    </select>
+                                </form>
+
+                                <form action="{{ url_for('delete_job', job_id=job.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this job posting? Associated candidates will also be deleted.');" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-danger-outline">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24" class="empty-icon">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <h3>No Job Descriptions Yet</h3>
+                        <p>Fill out the form on the left to add your first job opening.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

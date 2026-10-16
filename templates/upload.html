@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+
+{% block title %}Upload & Match Resume - ATS Recruiter Pro{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Resume Upload &amp; Analysis</h1>
+            <p class="page-subtitle">Upload candidate resumes in PDF or DOCX format for automatic text extraction, TF-IDF scoring, and skill gap roadmaps.</p>
+        </div>
+    </div>
+
+    <!-- If matching result preview is present after upload, display here -->
+    {% if result_preview %}
+    <section class="card result-card">
+        <div class="card-header result-header">
+            <div>
+                <span class="badge badge-success">Analysis Complete</span>
+                <h2 class="card-title mt-1">Match Report for {{ result_preview.name }}</h2>
+                <div class="mt-2">
+                    <span class="role-chips-label">Target Job Role:</span>
+                    <span class="role-badge {{ result_preview.role_style.class_name }}">
+                        <span class="role-dot"></span>
+                        {{ result_preview.job_title }}
+                    </span>
+                </div>
+            </div>
+            <div class="result-actions">
+                <a href="{{ url_for('candidate_detail', candidate_id=result_preview.id) }}" class="btn btn-primary">
+                    View Complete Profile &amp; Roadmaps
+                </a>
+                <a href="{{ url_for('candidates_page') }}" class="btn btn-secondary">
+                    Go to Candidates
+                </a>
+            </div>
+        </div>
+
+        <div class="result-body">
+            <!-- Score & Transparent Explanation Banner -->
+            <div class="match-score-section">
+                <div class="score-circle-container">
+                    <div class="score-number {% if result_preview.match_percentage >= 60 %}text-green{% elif result_preview.match_percentage >= 35 %}text-amber{% else %}text-red{% endif %}">
+                        {{ result_preview.match_percentage }}%
+                    </div>
+                    <span class="score-tagline">Cosine Similarity Score</span>
+                </div>
+                
+                <div class="score-explanation">
+                    <h4>How this score is calculated:</h4>
+                    <p>
+                        This ATS converts both the <strong>job description</strong> and <strong>candidate resume</strong> into mathematical vectors using <strong>TF-IDF</strong> (Term Frequency &bull; Inverse Document Frequency). 
+                        <strong>Cosine Similarity</strong> measures document alignment, combined with <strong>Skill Coverage</strong>. 
+                        No opaque AI models or hallucinated scores are used.
+                    </p>
+                    <div class="progress-bar-large">
+                        <div class="progress-fill {% if result_preview.match_percentage >= 60 %}fill-high{% elif result_preview.match_percentage >= 35 %}fill-mid{% else %}fill-low{% endif %}" style="width: {{ result_preview.match_percentage }}%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skills Comparison Grid -->
+            <div class="skills-comparison-grid">
+                <!-- Matched Skills -->
+                <div class="skills-box skills-matched">
+                    <div class="skills-box-header">
+                        <div class="skills-box-title">
+                            <span class="skills-indicator indicator-green"></span>
+                            Matched Skills ({{ result_preview.matched_skills|length }})
+                        </div>
+                        <span class="skills-subtitle">Candidate verified these required skills</span>
+                    </div>
+                    <div class="skills-tags">
+                        {% if result_preview.matched_skills %}
+                            {% for skill in result_preview.matched_skills %}
+                                <span class="tag tag-matched">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    {{ skill }}
+                                </span>
+                            {% endfor %}
+                        {% else %}
+                            <p class="no-skills-text">No direct skill matches detected in resume text.</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Missing Skills Summary -->
+                <div class="skills-box skills-missing">
+                    <div class="skills-box-header">
+                        <div class="skills-box-title">
+                            <span class="skills-indicator indicator-red"></span>
+                            Missing Skills &amp; Gaps ({{ result_preview.missing_skills|length }})
+                        </div>
+                        <span class="skills-subtitle">Skills required by role but not found in resume</span>
+                    </div>
+                    <div class="skills-tags">
+                        {% if result_preview.missing_skills %}
+                            {% for skill in result_preview.missing_skills %}
+                                <span class="tag tag-missing">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                    {{ skill }}
+                                </span>
+                            {% endfor %}
+                        {% else %}
+                            <p class="no-skills-text text-green">All key skills identified in the job description are present!</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deep Missing Skills & Learning Roadmaps Feature (Requested) -->
+            {% if result_preview.missing_skills_detailed %}
+            <div class="mt-4">
+                <div class="flex-between">
+                    <div>
+                        <h3 class="card-title">Missing Skills Analysis &amp; Upskilling Roadmaps</h3>
+                        <p class="card-subtitle">Prioritized skill gaps, learning roadmaps, and screening interview questions for recruiters</p>
+                    </div>
+                </div>
+
+                <div class="missing-skills-grid">
+                    {% for ms in result_preview.missing_skills_detailed %}
+                        <div class="missing-skill-card {% if ms.priority in ['Critical', 'Core'] %}critical{% endif %}">
+                            <div class="missing-skill-header">
+                                <span class="missing-skill-name">
+                                    {% if ms.priority in ['Critical', 'Core'] %}
+                                        <svg width="18" height="18" fill="none" stroke="#dc2626" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                        </svg>
+                                    {% else %}
+                                        <svg width="18" height="18" fill="none" stroke="#d97706" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    {% endif %}
+                                    {{ ms.name }}
+                                </span>
+                                <span class="badge-priority {{ ms.priority_class }}">{{ ms.priority }}</span>
+                            </div>
+
+                            <div class="est-time-tag">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                Est. Upskilling Time: <strong>{{ ms.est_time }}</strong>
+                            </div>
+
+                            <div class="learning-topics-box">
+                                <div class="learning-box-title">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                    </svg>
+                                    Key Study Topics:
+                                </div>
+                                <p>{{ ms.topics }}</p>
+                            </div>
+
+                            <div class="interview-question-box">
+                                <div class="interview-box-title">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    Screening Question for Recruiter:
+                                </div>
+                                <p class="interview-box-quote">"{{ ms.interview_question }}"</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Constructive Candidate Feedback Email Generator -->
+            <div class="feedback-card">
+                <div class="feedback-header">
+                    <div class="feedback-title">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                        </svg>
+                        Constructive Candidate Feedback Generator
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-primary" onclick="copyFeedbackText('feedbackPreviewText', this)">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
+                            </svg>
+                            Copy Feedback Email
+                        </button>
+                        <span id="copyToast" class="copy-toast">Copied to Clipboard!</span>
+                    </div>
+                </div>
+                <div class="feedback-content" id="feedbackPreviewText">{{ result_preview.feedback_text }}</div>
+            </div>
+            {% endif %}
+
+            <!-- Extracted Resume Text Box -->
+            <div class="extracted-text-section">
+                <div class="extracted-header">
+                    <h4>Automatically Extracted Resume Text</h4>
+                    <span class="file-label">File: {{ result_preview.filename }}</span>
+                </div>
+                <div class="extracted-content-box">
+                    <pre>{{ result_preview.extracted_text }}</pre>
+                </div>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Resume Upload Form -->
+    <div class="upload-layout {% if result_preview %}mt-4{% endif %}">
+        <section class="card">
+            <div class="card-header">
+                <h2 class="card-title">Upload Candidate Resume</h2>
+                <p class="card-subtitle">Supported formats: PDF (.pdf) and Microsoft Word (.docx)</p>
+            </div>
+
+            {% if not jobs %}
+                <div class="alert alert-warning">
+                    <strong>Notice:</strong> You haven't added any Job Descriptions yet. 
+                    <a href="{{ url_for('job_page') }}" class="alert-link">Create a Job Description</a> first so uploaded resumes can be evaluated and scored.
+                </div>
+            {% endif %}
+
+            <form action="{{ url_for('upload_page') }}" method="POST" enctype="multipart/form-data" class="ats-form" id="uploadForm">
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="name" class="form-label">Candidate Full Name <span class="required">*</span></label>
+                        <input type="text" id="name" name="name" class="form-input" placeholder="e.g., Alex Johnson" required>
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label for="job_id" class="form-label">Target Job Role <span class="required">*</span></label>
+                        <select id="job_id" name="job_id" class="form-select" required>
+                            <option value="" disabled selected>-- Select a Job Position --</option>
+                            {% for job in jobs %}
+                                <option value="{{ job.id }}">{{ job.title }} ({{ job.role_style.category }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="email" class="form-label">Email Address (Optional)</label>
+                        <input type="email" id="email" name="email" class="form-input" placeholder="e.g., alex.johnson@email.com">
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label for="phone" class="form-label">Phone Number (Optional)</label>
+                        <input type="tel" id="phone" name="phone" class="form-input" placeholder="e.g., +1 555-0199">
+                    </div>
+                </div>
+
+                <!-- Drag and Drop Dropzone -->
+                <div class="form-group">
+                    <label class="form-label">Resume Document (.pdf or .docx) <span class="required">*</span></label>
+                    <div class="dropzone" id="dropzone">
+                        <input type="file" id="resume_file" name="resume_file" class="dropzone-file-input" accept=".pdf,.docx" required>
+                        <div class="dropzone-content">
+                            <svg class="dropzone-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="48" height="48">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                            </svg>
+                            <p class="dropzone-text"><strong>Click to browse</strong> or drag &amp; drop resume file here</p>
+                            <p class="dropzone-subtext">PDF or DOCX documents up to 16MB</p>
+                            <div id="file-name-preview" class="file-name-badge hidden"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-lg" id="submitBtn" {% if not jobs %}disabled{% endif %}>
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                        </svg>
+                        Upload, Extract &amp; Match
+                    </button>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>
+{% endblock %}

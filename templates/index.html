@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - ATS Recruiter Pro{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <!-- Executive Recruiter Hero Banner -->
+    <section class="dashboard-hero-banner">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="pulse-dot"></span>
+                <span>Automated Candidate Screening Active &bull; TF-IDF &amp; Cosine Engine</span>
+            </div>
+            <h1 class="hero-title">Talent Intelligence &amp; ATS Dashboard</h1>
+            <p class="hero-subtitle">
+                Screen applicant resumes, benchmark candidate scores against target role requirements, and fast-track top engineering talent.
+            </p>
+        </div>
+        <div class="hero-actions">
+            <a href="{{ url_for('upload_page') }}" class="btn btn-hero-primary">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Upload &amp; Match Resume
+            </a>
+            <a href="{{ url_for('job_page') }}" class="btn btn-hero-secondary">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                New Target Job
+            </a>
+        </div>
+    </section>
+
+    <!-- Statistics Cards Grid with Vibrant Color Styling -->
+    <div class="stats-grid">
+        <div class="stat-card stat-card-blue">
+            <div class="stat-icon stat-icon-blue">
+                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Total Applicants</span>
+                <span class="stat-value text-blue">{{ total_candidates }}</span>
+            </div>
+        </div>
+
+        <div class="stat-card stat-card-green">
+            <div class="stat-icon stat-icon-green">
+                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Shortlisted</span>
+                <span class="stat-value text-green">{{ shortlisted_count }}</span>
+            </div>
+        </div>
+
+        <div class="stat-card stat-card-amber">
+            <div class="stat-icon stat-icon-amber">
+                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Under Review</span>
+                <span class="stat-value text-amber">{{ reviewing_count }}</span>
+            </div>
+        </div>
+
+        <div class="stat-card stat-card-red">
+            <div class="stat-icon stat-icon-red">
+                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Rejected</span>
+                <span class="stat-value text-red">{{ rejected_count }}</span>
+            </div>
+        </div>
+
+        <div class="stat-card stat-card-purple">
+            <div class="stat-icon stat-icon-purple">
+                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Active Target Roles</span>
+                <span class="stat-value text-purple">{{ total_jobs }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Two-Column Section -->
+    <div class="dashboard-columns">
+        <!-- Recent Candidates Section -->
+        <section class="card content-column-main">
+            <div class="card-header flex-between">
+                <div>
+                    <h2 class="card-title">Recent Applicants</h2>
+                    <p class="card-subtitle">Latest resume uploads, target job matches, and similarity scores</p>
+                </div>
+                <a href="{{ url_for('candidates_page') }}" class="card-action-link">View Pipeline ({{ total_candidates }}) &rarr;</a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Candidate</th>
+                            <th>Target Job Role</th>
+                            <th>Match Score</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if recent_candidates %}
+                            {% for c in recent_candidates %}
+                                <tr>
+                                    <td>
+                                        <div class="candidate-meta">
+                                            <a href="{{ url_for('candidate_detail', candidate_id=c.id) }}" class="candidate-name-link">
+                                                {{ c.name }}
+                                            </a>
+                                            {% if c.email %}
+                                                <span class="candidate-email">{{ c.email }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="role-badge {{ c.role_style.class_name }}">
+                                            <span class="role-dot"></span>
+                                            {{ c.job_title }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="score-pill-container">
+                                            <span class="score-badge {% if c.match_percentage >= 60 %}score-high{% elif c.match_percentage >= 35 %}score-mid{% else %}score-low{% endif %}">
+                                                {{ c.match_percentage }}%
+                                            </span>
+                                            <div class="mini-progress-bar">
+                                                <div class="mini-progress-fill {% if c.match_percentage >= 60 %}fill-high{% elif c.match_percentage >= 35 %}fill-mid{% else %}fill-low{% endif %}" style="width: {{ c.match_percentage }}%;"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge status-{{ c.status.lower() }}">{{ c.status }}</span>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('candidate_detail', candidate_id=c.id) }}" class="btn btn-sm btn-outline">Review</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="empty-state">
+                                    <p>No candidates added yet.</p>
+                                    <a href="{{ url_for('upload_page') }}" class="btn btn-sm btn-primary">Upload First Resume</a>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Active Jobs Preview -->
+        <section class="card content-column-side">
+            <div class="card-header flex-between">
+                <div>
+                    <h2 class="card-title">Target Job Roles</h2>
+                    <p class="card-subtitle">Active hiring requirements</p>
+                </div>
+                <a href="{{ url_for('job_page') }}" class="card-action-link">+ New Job</a>
+            </div>
+
+            <div class="jobs-list">
+                {% if recent_jobs %}
+                    {% for j in recent_jobs %}
+                        <div class="job-item">
+                            <div class="job-item-header">
+                                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                                    <h3 class="job-item-title">
+                                        <a href="{{ url_for('job_detail_page', job_id=j.id) }}" style="color: inherit;">
+                                            {{ j.title }}
+                                        </a>
+                                    </h3>
+                                    <span class="role-badge {{ j.role_style.class_name }}" style="font-size: 11px; padding: 2px 8px;">
+                                        <span class="role-dot"></span> {{ j.role_style.category }}
+                                    </span>
+                                </div>
+                                <span class="badge badge-light">{{ j.candidate_count }} applicant{% if j.candidate_count != 1 %}s{% endif %}</span>
+                            </div>
+                            <p class="job-item-desc">{{ j.description[:110] }}...</p>
+                            <div class="job-item-footer">
+                                <a href="{{ url_for('job_detail_page', job_id=j.id) }}" class="link-small" style="font-weight: 700; color: var(--color-primary);">View Pipeline</a>
+                                <a href="{{ url_for('upload_page', job_id=j.id) }}" class="link-small">+ Upload Resume</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <p>No job descriptions posted yet.</p>
+                        <a href="{{ url_for('job_page') }}" class="btn btn-sm btn-secondary">Post a Job</a>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

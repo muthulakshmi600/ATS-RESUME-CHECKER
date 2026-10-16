@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 50" width="240" height="50" fill="none">
+  <defs>
+    <linearGradient id="docGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14213D" />
+      <stop offset="100%" stop-color="#2563EB" />
+    </linearGradient>
+    <linearGradient id="checkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14B8A6" />
+      <stop offset="100%" stop-color="#16A34A" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#14213D" flood-opacity="0.2" />
+    </filter>
+  </defs>
+
+  <!-- ICON CONTAINER (40x40 centered vertically) -->
+  <g transform="translate(5, 5)" filter="url(#shadow)">
+    <!-- Document Card Base -->
+    <rect x="2" y="2" width="30" height="36" rx="6" fill="url(#docGrad)" />
+    
+    <!-- Document Fold Corner -->
+    <path d="M24 2 L32 10 L24 10 Z" fill="#60A5FA" opacity="0.6" />
+    
+    <!-- Resume Content Lines -->
+    <line x1="8" y1="12" x2="18" y2="12" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.9" />
+    <line x1="8" y1="17" x2="22" y2="17" stroke="#93C5FD" stroke-width="1.8" stroke-linecap="round" opacity="0.8" />
+    <line x1="8" y1="22" x2="16" y2="22" stroke="#93C5FD" stroke-width="1.8" stroke-linecap="round" opacity="0.8" />
+
+    <!-- AI Intelligence Circuit / Nodes -->
+    <circle cx="21" cy="23" r="1.8" fill="#14B8A6" />
+    <circle cx="27" cy="18" r="1.8" fill="#14B8A6" />
+    <line x1="21" y1="23" x2="27" y2="18" stroke="#14B8A6" stroke-width="1.2" stroke-dasharray="1 1" />
+    
+    <!-- AI Sparkle Pin on Document -->
+    <path d="M10 28 L11 26 L12 28 L14 29 L12 30 L11 32 L10 30 L8 29 Z" fill="#38BDF8" />
+
+    <!-- Verified ATS Checkmark Badge (overlapping bottom-right) -->
+    <circle cx="27" cy="29" r="7.5" fill="#FFFFFF" />
+    <circle cx="27" cy="29" r="6.5" fill="url(#checkGrad)" />
+    <path d="M24 29 L26 31 L30.5 26.5" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+
+  <!-- LOGO PRODUCT TEXT: ResumeAI ATS -->
+  <g transform="translate(54, 32)">
+    <!-- "Resume" text in Deep Navy #14213D -->
+    <text x="0" y="0" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="800" fill="#14213D" letter-spacing="-0.5">Resume<tspan fill="#2563EB">AI</tspan></text>
+    
+    <!-- ATS Pill Badge in Teal / Royal Blue -->
+    <rect x="110" y="-18" width="46" height="20" rx="5" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.2" />
+    <text x="133" y="-4" font-family="'Inter', -apple-system, BlinkMacSystemFont, sans-serif" font-size="11" font-weight="800" fill="#2563EB" text-anchor="middle" letter-spacing="0.8">ATS</text>
+  </g>
+</svg>
